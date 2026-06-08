@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "esnext",
-    "resolvePackageJsonExports": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2021",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -20,7 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
   },
   "ts-node": {
     "esm": true,
