@@ -5,6 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { createHash } from 'crypto';
 import { LoginUserVO } from './vo/login-user.vo';
+import { JwtService } from '@nestjs/jwt';
 
 function md5(string: string) {
   const hash = createHash('md5');
@@ -14,7 +15,11 @@ function md5(string: string) {
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+
   async user(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
@@ -68,10 +73,17 @@ export class UserService {
     if (foundUser.password !== md5(password)) {
       throw new HttpException('Invalid username or password', 400);
     }
+
+    const token = this.jwtService.sign({
+      id: foundUser.id,
+      email: foundUser.email,
+      iat: Math.floor(Date.now() / 1000),
+    });
+
     const loginUserVO = new LoginUserVO();
     loginUserVO.elements = {
       user: foundUser,
-      token: 'token',
+      token,
     };
     loginUserVO.status = 'success';
     return loginUserVO;
