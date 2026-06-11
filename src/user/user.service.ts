@@ -88,4 +88,28 @@ export class UserService {
     loginUserVO.status = 'success';
     return loginUserVO;
   }
+
+  async getPermissionsByUserId(userId: number): Promise<string[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        userPermissions: {
+          include: {
+            permission: true, // all permissions where userId=[userId in param]
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
+
+    const permissionsSet = new Set<string>();
+    user.userPermissions.forEach((role) => {
+      permissionsSet.add(role.permission.name);
+    });
+
+    return Array.from(permissionsSet);
+  }
 }

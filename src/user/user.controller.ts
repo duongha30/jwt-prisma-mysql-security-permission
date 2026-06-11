@@ -6,16 +6,19 @@ import {
   Req,
   UseGuards,
   ValidationPipe,
+  Delete,
+  SetMetadata,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { LoginUserVO } from './vo/login-user.vo';
 import { LoginGuard } from 'src/login.guard';
+import { PermissionGuard } from './permission.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post('register')
   create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
@@ -31,5 +34,12 @@ export class UserController {
   @UseGuards(LoginGuard)
   async getProfile(@Req() req: Request) {
     return 'Profile';
+  }
+
+  @Delete('delete')
+  @UseGuards(LoginGuard, PermissionGuard)
+  @SetMetadata('permissions', ['DEL_USER'])
+  async delete(@Body('id') delUser: { userId: number }) {
+    return 'delete user with id: OK';
   }
 }
