@@ -89,13 +89,13 @@ export class UserService {
     return loginUserVO;
   }
 
-  async getPermissionsByUserId(userId: number): Promise<string[]> {
+  async getRoleByUserId(userId: number): Promise<string> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        userPermissions: {
+        userRole: {
           include: {
-            permission: true, // all permissions where userId=[userId in param]
+            role: true, // all roles where userId=[userId in param]
           },
         },
       },
@@ -104,12 +104,41 @@ export class UserService {
     if (!user) {
       throw new HttpException('User not found', 404);
     }
+    const userRoles = user?.userRole[0].role;
 
-    const permissionsSet = new Set<string>();
-    user.userPermissions.forEach((role) => {
-      permissionsSet.add(role.permission.name);
+    return userRoles.roleName;
+  }
+
+  async getPermissionsByUserId(userId: number): Promise<string[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        userRole: {
+          include: {
+            role: {
+              include: {
+                rolePermissions: {
+                  include: {
+                    permission: true, // the Permission behind each RolePermission
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
 
-    return Array.from(permissionsSet);
+    const permissions = new Set<string>();
+    for (const userRole of user.userRole) {
+      for (const rolePermission of userRole.role.rolePermissions) {
+        permissions.add(rolePermission.permission.name);
+      }
+    }
+
+    return Array.from(permissions);
   }
 }

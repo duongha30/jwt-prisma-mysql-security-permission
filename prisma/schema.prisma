@@ -21,7 +21,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userPermissions UserPermission[] @relation("UserPermissions")
+  userRole UserRole[] @relation("UserRole")
 }
 
 model Permission {
@@ -31,18 +31,37 @@ model Permission {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userPermissions UserPermission[] @relation("UserPermissions")
+  rolePermissions RolePermission[] @relation("RolePermission")
 }
 
-model UserPermission {
+model Role {
+  id        Int      @id @default(autoincrement())
+  roleName  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rolePermissions RolePermission[] @relation("RolePermission")
+  userRole        UserRole[]       @relation("UserRole")
+}
+
+model RolePermission {
   id           Int      @id @default(autoincrement())
-  userId       Int
+  roleId       Int
   permissionId Int
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updateAt     DateTime @default(now())
 
-  user       User       @relation("UserPermissions", fields: [userId], references: [id])
-  permission Permission @relation("UserPermissions", fields: [permissionId], references: [id])
+  role       Role       @relation("RolePermission", fields: [roleId], references: [id])
+  permission Permission @relation("RolePermission", fields: [permissionId], references: [id])
+}
 
-  @@unique([userId, permissionId])
+model UserRole {
+  id        Int      @id @default(autoincrement())
+  roleId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  role Role @relation("UserRole", fields: [roleId], references: [id])
+  user User @relation("UserRole", fields: [userId], references: [id])
 }

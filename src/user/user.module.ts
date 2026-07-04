@@ -6,5 +6,6 @@ import { LoginGuard } from 'src/login.guard';
 @Module({
   controllers: [UserController],
   providers: [UserService, LoginGuard],
+  exports: [UserService],
 })
 export class UserModule {}
